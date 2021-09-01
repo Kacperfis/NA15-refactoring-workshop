@@ -32,6 +32,13 @@ public:
 
     void receive(std::unique_ptr<Event> e) override;
 
+    //ADDED
+    //void Push_Segments(int&, std::string const&, std::__cxx11::list<Snake::Controller::Segment>& );
+    void Switch_Menu(char&);
+    void Search_Segment();
+    //void Through_Segments(Controller::Segment&, bool&); //blad
+    //void SendScoreAndFood(IPort&, IPort&);
+
 private:
     struct Segment
     {

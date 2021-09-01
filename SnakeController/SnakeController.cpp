@@ -16,6 +16,76 @@ UnexpectedEventException::UnexpectedEventException()
     : std::runtime_error("Unexpected event received!")
 {}
 
+//ADDED
+
+/*
+void SendScoreAndFood(IPort& m_scorePort, IPort& m_foodPort)
+{
+    m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
+    m_foodPort.send(std::make_unique<EventT<FoodReq>>());
+};
+*/
+
+//KROK 2
+/*
+void Controller::Push_Segments(int& length, std::string const& p_config, std::__cxx11::list<Snake::Controller::Segment>& m_segments)
+{
+    std::istringstream istr(p_config);
+    while (length) {
+            Controller::Segment seg;
+            istr >> seg.x >> seg.y;
+            seg.ttl = length--;
+
+            m_segments.push_back(seg);
+        }
+}
+
+
+void Controller::Through_Segments(Segment& newHead, bool& lost)
+{
+    for (auto segment : m_segments){
+        if (segment.x == newHead.x and segment.y == newHead.y) {
+            m_scorePort.send(std::make_unique<EventT<LooseInd>>());
+            lost = true;
+            break;
+        }
+    }
+}
+*/
+
+void Controller::Search_Segment()
+{
+     for (auto &segment : m_segments) {
+        if (not --segment.ttl) {
+            DisplayInd l_evt;
+            l_evt.x = segment.x;
+            l_evt.y = segment.y;
+            l_evt.value = Cell_FREE;
+
+            m_displayPort.send(std::make_unique<EventT<DisplayInd>>(l_evt));
+        }
+    }
+}
+
+void Controller::Switch_Menu(char &d){
+    switch (d) {
+            case 'U':
+                m_currentDirection = Direction_UP;
+                break;
+            case 'D':
+                m_currentDirection = Direction_DOWN;
+                break;
+            case 'L':
+                m_currentDirection = Direction_LEFT;
+                break;
+            case 'R':
+                m_currentDirection = Direction_RIGHT;
+                break;
+            default:
+                throw ConfigurationError();
+        }
+}
+
 Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config)
     : m_displayPort(p_displayPort),
       m_foodPort(p_foodPort),
@@ -33,24 +103,14 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
         m_foodPosition = std::make_pair(foodX, foodY);
 
         istr >> d;
-        switch (d) {
-            case 'U':
-                m_currentDirection = Direction_UP;
-                break;
-            case 'D':
-                m_currentDirection = Direction_DOWN;
-                break;
-            case 'L':
-                m_currentDirection = Direction_LEFT;
-                break;
-            case 'R':
-                m_currentDirection = Direction_RIGHT;
-                break;
-            default:
-                throw ConfigurationError();
-        }
+
+        Switch_Menu(d);
+    
         istr >> length;
 
+        //KROK 2
+        //Push_Segments(length, p_config, m_segments);
+        
         while (length) {
             Segment seg;
             istr >> seg.x >> seg.y;
@@ -58,9 +118,12 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 
             m_segments.push_back(seg);
         }
-    } else {
+        
+    }
+    if (w != 'W' || f != 'F' || s != 'S') {
         throw ConfigurationError();
     }
+    
 }
 
 void Controller::receive(std::unique_ptr<Event> e)
@@ -77,6 +140,8 @@ void Controller::receive(std::unique_ptr<Event> e)
 
         bool lost = false;
 
+        //Through_Segments(newHead, lost);
+        
         for (auto segment : m_segments) {
             if (segment.x == newHead.x and segment.y == newHead.y) {
                 m_scorePort.send(std::make_unique<EventT<LooseInd>>());
@@ -84,27 +149,18 @@ void Controller::receive(std::unique_ptr<Event> e)
                 break;
             }
         }
-
+        
         if (not lost) {
             if (std::make_pair(newHead.x, newHead.y) == m_foodPosition) {
-                m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
-                m_foodPort.send(std::make_unique<EventT<FoodReq>>());
+                 m_scorePort.send(std::make_unique<EventT<ScoreInd>>());
+                 m_foodPort.send(std::make_unique<EventT<FoodReq>>());
             } else if (newHead.x < 0 or newHead.y < 0 or
                        newHead.x >= m_mapDimension.first or
                        newHead.y >= m_mapDimension.second) {
                 m_scorePort.send(std::make_unique<EventT<LooseInd>>());
                 lost = true;
             } else {
-                for (auto &segment : m_segments) {
-                    if (not --segment.ttl) {
-                        DisplayInd l_evt;
-                        l_evt.x = segment.x;
-                        l_evt.y = segment.y;
-                        l_evt.value = Cell_FREE;
-
-                        m_displayPort.send(std::make_unique<EventT<DisplayInd>>(l_evt));
-                    }
-                }
+                Search_Segment();
             }
         }
 
@@ -186,7 +242,7 @@ void Controller::receive(std::unique_ptr<Event> e)
                     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
                 } catch (std::bad_cast&) {
                     throw UnexpectedEventException();
-                }
+               }
             }
         }
     }
