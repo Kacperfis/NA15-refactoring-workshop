@@ -69,15 +69,15 @@ void Controller::PauseFeature(const PauseInd&){
     Segment newHead = getNewHead();
     doesCollideWithWall(newHead);
     //m_scorePort.send(std::make_unique<EventT<PauseInd>>());
-  //  m_foodPort.send(std::make_unique<EventT<PauseInd>>());
+  // m_foodPort.send(std::make_unique<EventT<PauseInd>>());
     
-    /*
-    if(!doesCollideWithFood(newHead))
+    
+    if(doesCollideWithWall(newHead))
     {
         m_scorePort.send(std::make_unique<EventT<PauseInd>>());
         m_foodPort.send(std::make_unique<EventT<PauseInd>>());
     }
-    */
+    
 }
 
 /////////
