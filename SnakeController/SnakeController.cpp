@@ -216,7 +216,6 @@ Controller::Segment Controller::getNewHead() const
 
 void Controller::receive(std::unique_ptr<Event> e)
 {
-   
     std::cout << "1message id: "<< e->getMessageId();
     if(e->getMessageId() == TimeoutInd::MESSAGE_ID){
         handleTimePassed(e);
