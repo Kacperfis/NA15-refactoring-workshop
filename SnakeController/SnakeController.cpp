@@ -191,7 +191,7 @@ bool Segments::doesCollideWithFood(const Controller::Segment &newHead) const //S
     return std::make_pair(newHead.x, newHead.y) == m_foodPosition;
 }
 
-void Controller::notifyAboutFailure() //WORLD
+void World::notifyAboutFailure() //WORLD
 {
     m_scorePort.send(std::make_unique<EventT<LooseInd>>());
 }

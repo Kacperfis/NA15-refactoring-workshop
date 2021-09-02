@@ -85,6 +85,7 @@ public:
     bool doesCollideWithSnake(const Controller::Segment &newSegment) const;
     bool doesCollideWithWall(const Controller::Segment &newSegment) const;
     bool doesCollideWithFood(const Controller::Segment &newHead) const; 
+    void repaintTile(const Controller::Segment &position, Cell type);
 
 private:
     IPort& m_displayPort;
