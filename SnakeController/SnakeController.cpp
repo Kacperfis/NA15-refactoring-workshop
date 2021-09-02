@@ -218,16 +218,16 @@ void Controller::receive(std::unique_ptr<Event> e)
 {
     std::cout << "1message id: "<< e->getMessageId();
     if(e->getMessageId() == TimeoutInd::MESSAGE_ID){
-        handleTimePassed(e);
+        handleTimePassed(*static_cast<EventT<TimeoutInd> const&>(*e));
     }
     else if(e->getMessageId() == DirectionInd::MESSAGE_ID){
-        handleDirectionChange(e);  
+        handleDirectionChange(*static_cast<EventT<DirectionInd> const&>(*e));  
     }
     else if(e->getMessageId() == FoodInd::MESSAGE_ID){
-        handleFoodPositionChange(e);
+        handleFoodPositionChange(*static_cast<EventT<FoodInd> const&>(*e));
     }
     else if(e->getMessageId() == FoodResp::MESSAGE_ID){
-        handleNewFood(e);
+        handleNewFood(*static_cast<EventT<FoodResp> const&>(*e));
     }
     
     //handleTimePassed(*dynamic_cast<EventT<TimeoutInd> const&>(*e));
