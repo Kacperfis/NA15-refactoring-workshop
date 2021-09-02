@@ -72,14 +72,19 @@ private:
     bool m_paused;
 };
 
-class Segments : public IEventHandler{
+class Segments : public IEventHandler, public Controller{
 public:
     Segments(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config);
 
-    Segments(Controller const& p_rhs) = delete;
+    Segments(Segments const& p_rhs) = delete;
     Segments& operator=(Segments const& p_rhs) = delete;
 
     void receive(std::unique_ptr<Event> e) override;
+    void handleTimePassed(const TimeoutInd&);
+    void handleDirectionChange(const DirectionInd& directionInd);
+    bool doesCollideWithSnake(const Controller::Segment &newSegment) const;
+    bool doesCollideWithWall(const Controller::Segment &newSegment) const;
+    bool doesCollideWithFood(const Controller::Segment &newHead) const; 
 
 private:
     IPort& m_displayPort;
@@ -87,10 +92,45 @@ private:
     IPort& m_scorePort;
 
     std::pair<int, int> m_mapDimension;
+    std::pair<int, int> m_foodPosition;
+
+    struct Segment
+    {
+        int x;
+        int y;
+    };
+
+    std::list<Segment> m_segments;
+    Direction m_currentDirection;
 };
 
-class World{
+class World : public IEventHandler, public Controller{
+    World(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config);
 
+    World(World const& p_rhs) = delete;
+    World& operator=(World const& p_rhs) = delete;
+
+    void receive(std::unique_ptr<Event> e) override;
+    void handleFoodPositionChange(const FoodInd& receivedFood);
+    void handleNewFood(const FoodResp& requestedFood);
+    void notifyAboutFailure();
+
+private:
+    IPort& m_displayPort;
+    IPort& m_foodPort;
+    IPort& m_scorePort;
+
+    std::pair<int, int> m_mapDimension;
+    std::pair<int, int> m_foodPosition;
+
+    struct Segment
+    {
+        int x;
+        int y;
+    };
+
+    std::list<Segment> m_segments;
+    Direction m_currentDirection;
 };
 
 } // namespace Snake

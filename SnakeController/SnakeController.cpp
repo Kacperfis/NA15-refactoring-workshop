@@ -65,7 +65,7 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
 
 /////////////////
 
-void Controller::PauseFeature(const PauseInd&){
+void Controller::PauseFeature(const PauseInd&){ //WORLD
     Segment newHead = getNewHead();
     doesCollideWithWall(newHead);
     //m_scorePort.send(std::make_unique<EventT<PauseInd>>());
@@ -82,7 +82,7 @@ void Controller::PauseFeature(const PauseInd&){
 
 /////////
 
-void Controller::handleTimePassed(const TimeoutInd&)
+void Segments::handleTimePassed(const TimeoutInd&) //SEGMENT
 {
     Segment newHead = getNewHead();
 
@@ -116,7 +116,7 @@ void Controller::handleTimePassed(const TimeoutInd&)
     cleanNotExistingSnakeSegments();
 }
 
-void Controller::handleDirectionChange(const DirectionInd& directionInd)
+void Segments::handleDirectionChange(const DirectionInd& directionInd) //SEGMENT
 {
     auto direction = directionInd.direction;
 
@@ -125,7 +125,7 @@ void Controller::handleDirectionChange(const DirectionInd& directionInd)
     }
 }
 
-void Controller::handleFoodPositionChange(const FoodInd& receivedFood)
+void World::handleFoodPositionChange(const FoodInd& receivedFood) //WORLD
 {
     bool requestedFoodCollidedWithSnake = false;
     for (auto const& segment : m_segments) {
@@ -146,7 +146,7 @@ void Controller::handleFoodPositionChange(const FoodInd& receivedFood)
     m_foodPosition = std::make_pair(receivedFood.x, receivedFood.y);
 }
 
-void Controller::handleNewFood(const FoodResp& requestedFood)
+void World::handleNewFood(const FoodResp& requestedFood) //WORLD
 {
     bool requestedFoodCollidedWithSnake = false;
     for (auto const& segment : m_segments) {
@@ -169,7 +169,7 @@ void Controller::handleNewFood(const FoodResp& requestedFood)
     m_foodPosition = std::make_pair(requestedFood.x, requestedFood.y);
 }
 
-bool Controller::doesCollideWithSnake(const Controller::Segment &newSegment) const
+bool Segments::doesCollideWithSnake(const Controller::Segment &newSegment) const //SEGMENT
 {
     for (auto segment : m_segments) {
         if (segment.x == newSegment.x and segment.y == newSegment.y) {
@@ -179,29 +179,29 @@ bool Controller::doesCollideWithSnake(const Controller::Segment &newSegment) con
     return false;
 }
 
-bool Controller::doesCollideWithWall(const Controller::Segment &newSegment) const
+bool Segments::doesCollideWithWall(const Controller::Segment &newSegment) const //SEGMENT
 {
     return newSegment.x < 0 or newSegment.y < 0 or
            newSegment.x >= m_mapDimension.first or
            newSegment.y >= m_mapDimension.second;
 }
 
-bool Controller::doesCollideWithFood(const Controller::Segment &newHead) const
+bool Segments::doesCollideWithFood(const Controller::Segment &newHead) const //SEGMENT
 {
     return std::make_pair(newHead.x, newHead.y) == m_foodPosition;
 }
 
-void Controller::notifyAboutFailure()
+void Controller::notifyAboutFailure() //WORLD
 {
     m_scorePort.send(std::make_unique<EventT<LooseInd>>());
 }
 
-void Controller::repaintTile(const Controller::Segment &position, Cell type)
+void Controller::repaintTile(const Controller::Segment &position, Cell type) //SEGMENT
 {
     repaintTile(position.x, position.y, type);
 }
 
-void Controller::repaintTile(unsigned int x, unsigned int y, Cell type)
+void Controller::repaintTile(unsigned int x, unsigned int y, Cell type) //WORLD
 {
     DisplayInd indication{};
     indication.x = x;
@@ -210,7 +210,7 @@ void Controller::repaintTile(unsigned int x, unsigned int y, Cell type)
     m_displayPort.send(std::make_unique<EventT<DisplayInd>>(indication));
 }
 
-void Controller::cleanNotExistingSnakeSegments()
+void Controller::cleanNotExistingSnakeSegments() //SEGMENT
 {
     m_segments.erase(
          std::remove_if(
@@ -220,7 +220,7 @@ void Controller::cleanNotExistingSnakeSegments()
          m_segments.end());
 }
 
-Controller::Segment Controller::getNewHead() const
+Controller::Segment Controller::getNewHead() const //SEGMENT
 {
     Segment const& currentHead = m_segments.front();
 
@@ -232,7 +232,7 @@ Controller::Segment Controller::getNewHead() const
     return newHead;
 }
 
-void Controller::receive(std::unique_ptr<Event> e)
+void Controller::receive(std::unique_ptr<Event> e) //WORLD?
 {
     switch(e->getMessageId())
     {
