@@ -72,4 +72,25 @@ private:
     bool m_paused;
 };
 
+class Segments : public IEventHandler{
+public:
+    Segments(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePort, std::string const& p_config);
+
+    Segments(Controller const& p_rhs) = delete;
+    Segments& operator=(Segments const& p_rhs) = delete;
+
+    void receive(std::unique_ptr<Event> e) override;
+
+private:
+    IPort& m_displayPort;
+    IPort& m_foodPort;
+    IPort& m_scorePort;
+
+    std::pair<int, int> m_mapDimension;
+};
+
+class World{
+
+};
+
 } // namespace Snake
