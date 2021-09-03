@@ -34,7 +34,7 @@ Controller::Controller(IPort& p_displayPort, IPort& p_foodPort, IPort& p_scorePo
     istr >> w >> width >> height >> f >> foodX >> foodY >> s;
 
     if (w == 'W' and f == 'F' and s == 'S') {
-        m_world = std::make_unique<World>(std::make_pair(width, height), std::make_pair(foodX, foodY));
+        m_world = std::make_unique<World>(Dimension(width, height), std::make_pair(foodX, foodY));
 
         Direction startDirection;
         istr >> d;
