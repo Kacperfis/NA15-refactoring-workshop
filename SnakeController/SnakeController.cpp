@@ -77,8 +77,6 @@ void Controller::sendPlaceNewFood(int x, int y)
     DisplayInd placeNewFood;
     placeNewFood.position.x = x;
     placeNewFood.position.y = y;
-    //placeNewFood.x = x;
-    //placeNewFood.y = y;
     placeNewFood.value = Cell_FOOD;
 
     m_displayPort.send(std::make_unique<EventT<DisplayInd>>(placeNewFood));

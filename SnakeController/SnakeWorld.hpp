@@ -18,8 +18,7 @@ public:
 
 private:
     std::pair<int, int> m_foodPosition;
-    //std::pair<int, int> m_dimension;
-    Dimension m_dimension; //CHANGED
+    Dimension m_dimension; 
 };
 
 } // namespace Snake
